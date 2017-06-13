@@ -2,7 +2,8 @@ FROM alpine:3.6
 
 LABEL maintainer "Andre Peters <andre.peters@servercow.de>"
 
-RUN apk add -U --no-cache \
+RUN apk update \
+&& apk add --no-cache \
   iptables \
   ip6tables \
   python2 \
