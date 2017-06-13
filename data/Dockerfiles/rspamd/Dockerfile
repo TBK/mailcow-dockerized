@@ -9,7 +9,8 @@ COPY settings.conf /etc/rspamd/modules.d/settings.conf
 RUN echo 'http://dl-cdn.alpinelinux.org/alpine/edge/testing' >> /etc/apk/repositories \
 \
 # Installation
-&& apk add --update --no-cache rspamd \
+&& apk update \ 
+&& apk add --no-cache rspamd \
 \
 # Setup
 && echo '.include $LOCAL_CONFDIR/local.d/rspamd.conf.local' > /etc/rspamd/rspamd.conf.local
