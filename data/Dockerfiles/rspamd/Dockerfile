@@ -1,23 +1,17 @@
-FROM debian:jessie-slim
-LABEL maintainer "Andre Peters <andre.peters@servercow.de>"
+FROM alpine:edge
 
-ARG DEBIAN_FRONTEND=noninteractive
-ENV LC_ALL C
+LABEL maintainer "André Peters <andre.peters@servercow.de>"
 
-RUN apt-key adv --fetch-keys http://rspamd.com/apt-stable/gpg.key \
-	&& echo "deb http://rspamd.com/apt-stable/ jessie main" > /etc/apt/sources.list.d/rspamd.list \
-	&& apt-get update && apt-get install -y \
-		ca-certificates \
-		rspamd \
-	&& rm -rf /var/lib/apt/lists/* \
-	&& echo '.include $LOCAL_CONFDIR/local.d/rspamd.conf.local' > /etc/rspamd/rspamd.conf.local \
-	&& apt-get autoremove --purge \
-	&& apt-get clean \
-	&& mkdir -p /run/rspamd \
-	&& chown _rspamd:_rspamd /run/rspamd
-
+# Add file
 COPY settings.conf /etc/rspamd/modules.d/settings.conf
 
-CMD /usr/bin/rspamd -f -u _rspamd -g _rspamd
+# Nessecary until rspamd and fann have been moved to community
+RUN echo 'http://dl-cdn.alpinelinux.org/alpine/edge/testing' >> /etc/apk/repositories \
+\
+# Installation
+&& apk add --update --no-cache rspamd \
+\
+# Setup
+&& echo '.include $LOCAL_CONFDIR/local.d/rspamd.conf.local' > /etc/rspamd/rspamd.conf.local
 
-USER _rspamd
+CMD ["rspamd", "-f", "-u", "rspamd", "-g", "rspamd"]
