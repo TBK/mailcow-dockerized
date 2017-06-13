@@ -3,7 +3,6 @@ services:
 
     unbound-mailcow:
       image: mailcow/unbound
-      command: /usr/sbin/unbound
       depends_on:
         mysql-mailcow:
           condition: service_healthy

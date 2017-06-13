@@ -17,3 +17,4 @@ COPY docker-entrypoint.sh /docker-entrypoint.sh
 EXPOSE 53/udp 53/tcp
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["unbound"]
