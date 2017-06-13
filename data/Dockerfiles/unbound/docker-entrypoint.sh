@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 unbound-control-setup
 echo "Receiving anchor key..."
