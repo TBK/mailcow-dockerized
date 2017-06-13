@@ -20,7 +20,8 @@ services:
             - bind9
 
     mysql-mailcow:
-      image: mariadb:10.1
+      image: mailcow/mariadb
+      build: ./data/Dockerfiles/mariadb
       healthcheck:
         test: ["CMD", "mysqladmin", "ping", "--host", "localhost", "--silent"]
         interval: 10s
