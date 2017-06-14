@@ -1,38 +1,8 @@
-FROM debian:stretch-slim
+FROM alpine:3.6
+
 LABEL maintainer "Andre Peters <andre.peters@servercow.de>"
 
-ARG DEBIAN_FRONTEND=noninteractive
-ENV LC_ALL C
-
-RUN dpkg-divert --local --rename --add /sbin/initctl \
-	&& ln -sf /bin/true /sbin/initctl \
-	&& dpkg-divert --local --rename --add /usr/bin/ischroot \
-	&& ln -sf /bin/true /usr/bin/ischroot
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-	ca-certificates \
-	curl \
-	dirmngr \
-	gnupg \
-	libsasl2-modules \
-	postfix \
-	postfix-mysql \
-	postfix-pcre \
-	python-gpgme \
-	sasl2-bin \
-	sudo \
-	supervisor \
-	syslog-ng \
-	syslog-ng-core \
-	syslog-ng-mod-redis \
-	&& rm -rf /var/lib/apt/lists/*
-
-RUN addgroup --system --gid 600 zeyple
-RUN adduser --system --home /var/lib/zeyple --no-create-home --uid 600 --gid 600 --disabled-login zeyple
-RUN touch /var/log/zeyple.log && chown zeyple: /var/log/zeyple.log
-
-RUN touch /etc/default/locale
-
+# Add script
 COPY zeyple.py /usr/local/bin/zeyple.py
 COPY zeyple.conf /etc/zeyple.conf
 COPY supervisord.conf /etc/supervisor/supervisord.conf
@@ -40,8 +10,44 @@ COPY syslog-ng.conf /etc/syslog-ng/syslog-ng.conf
 COPY postfix.sh /opt/postfix.sh
 COPY whitelist_forwardinghosts.sh /usr/local/bin/whitelist_forwardinghosts.sh
 
+# Installation
+RUN apk update \
+&& apk add --no-cache \
+  bash \
+  ca-certificates \
+  curl \
+  cyrus-sasl \
+  gnupg \
+  gpgme \
+  postfix \
+  postfix-mysql \
+  postfix-pcre \
+  supervisor \
+  syslog-ng \
+  #libsasl2-modules - might need some cyrus-sasl* subpackages, cyrus-sasl-ntlm, cyrus-sasl-crammd5, cyrus-sasl-digestmd5...
+\
+# Install build dependencies
+&& apk add --no-cache --virtual .build-deps \
+  gcc \
+  gpgme-dev \
+  musl-dev \
+  python2-dev \
+  py-setuptools \
+  py2-pip \
+\
+# Zeyple dependencie
+&& pip install --no-cache-dir pygpgme \
+\
+# Clean up build dependencies
+&& apk del .build-deps \
+\
+# Add group + user for Zeyple
+&& set -x \
+&& addgroup -g 600 -S zeyple \
+&& adduser -u 600 -D -S -h /var/lib/zeyple -G zeyple zeyple \
+&& touch /var/log/zeyple.log \
+&& chown zeyple: /var/log/zeyple.log
+
 EXPOSE 588
 
-CMD exec /usr/bin/supervisord -c /etc/supervisor/supervisord.conf
-
-RUN rm -rf /tmp/* /var/tmp/*
+CMD ["exec", "/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
