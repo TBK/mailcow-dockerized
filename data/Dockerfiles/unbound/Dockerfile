@@ -5,13 +5,12 @@ LABEL maintainer "Andre Peters <andre.peters@servercow.de>"
 # Installation
 RUN apk update \
 && apk add --no-cache \
-	curl \
 	drill \
-	openssl \
 	unbound \
+	wget \
 \
 # Setup
-&& curl -o /etc/unbound/root.hints https://www.internic.net/domain/named.cache \
+&& ./etc/periodic/monthly/update-unbound-root-hints \
 && chown root:unbound /etc/unbound \
 && chmod 775 /etc/unbound
 
