@@ -6,6 +6,7 @@ chmod g+rw /dev/console
 echo "Receiving anchor key..."
 unbound-anchor -a /etc/unbound/trusted-key.key
 echo "Receiving root hints..."
-curl -#o /etc/unbound/root.hints https://www.internic.net/domain/named.cache
-/usr/sbin/unbound-control-setup
+./etc/periodic/monthly/update-unbound-root-hints
+echo "Generating self-signed certificate & keys..."
+unbound-control-setup
 exec "$@"

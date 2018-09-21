@@ -3,12 +3,9 @@ FROM alpine:3.6
 LABEL maintainer "Andre Peters <andre.peters@servercow.de>"
 
 RUN apk add --update --no-cache \
-	curl \
-	unbound \
-	bash \
-	openssl \
 	drill \
-	&& curl -o /etc/unbound/root.hints https://www.internic.net/domain/named.cache \
+	unbound \
+	&& ./etc/periodic/monthly/update-unbound-root-hints \
 	&& chown root:unbound /etc/unbound \
   && adduser unbound tty \
 	&& chmod 775 /etc/unbound
